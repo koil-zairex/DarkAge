@@ -1,122 +1,94 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+// Корневой компонент.
+// - хранит habits и entries в useState
+// - синхронизирует их с localStorage
+// - переключает 4 страницы через useState (без React Router)
 
-function App() {
-  const [count, setCount] = useState(0)
+import { useEffect, useState } from 'react';
+import { loadState, saveState } from './storage';
+import NavBar from './components/NavBar';
+import TodayPage from './pages/TodayPage';
+import HabitsPage from './pages/HabitsPage';
+import StatsPage from './pages/StatsPage';
+import SettingsPage from './pages/SettingsPage';
+
+export default function App() {
+  const initial = loadState();
+  const [habits, setHabits] = useState(initial.habits);
+  const [entries, setEntries] = useState(initial.entries);
+
+  const [page, setPage] = useState('today');
+
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem('habit-theme') || 'light'
+  );
+
+  useEffect(() => {
+    saveState({ habits, entries });
+  }, [habits, entries]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('habit-theme', theme);
+  }, [theme]);
+
+  const addHabit = (habit) => setHabits((prev) => [...prev, habit]);
+
+  const updateHabit = (id, patch) =>
+    setHabits((prev) => prev.map((h) => (h.id === id ? { ...h, ...patch } : h)));
+
+  const deleteHabit = (id) => {
+    setHabits((prev) => prev.filter((h) => h.id !== id));
+    setEntries((prev) => prev.filter((e) => e.habitId !== id));
+  };
+
+  const toggleEntry = (habitId, date) => {
+    setEntries((prev) => {
+      const existing = prev.find((e) => e.habitId === habitId && e.date === date);
+      if (existing) {
+        return prev.map((e) =>
+          e.habitId === habitId && e.date === date
+            ? { ...e, completed: !e.completed }
+            : e
+        );
+      }
+      return [...prev, { habitId, date, completed: true }];
+    });
+  };
+
+  const resetAll = () => {
+    const fresh = loadState();
+    setHabits(fresh.habits);
+    setEntries(fresh.entries);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+      <NavBar page={page} setPage={setPage} />
 
-      <div className="ticks"></div>
+      <main className="mx-auto max-w-2xl px-4 py-6">
+        {page === 'today' && (
+          <TodayPage habits={habits} entries={entries} onToggle={toggleEntry} />
+        )}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        {page === 'habits' && (
+          <HabitsPage
+            habits={habits}
+            onAdd={addHabit}
+            onUpdate={updateHabit}
+            onDelete={deleteHabit}
+          />
+        )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {page === 'stats' && <StatsPage habits={habits} entries={entries} />}
+
+        {page === 'settings' && (
+          <SettingsPage
+            theme={theme}
+            setTheme={setTheme}
+            onReset={resetAll}
+          />
+        )}
+      </main>
+    </div>
+  );
 }
-
-export default App
