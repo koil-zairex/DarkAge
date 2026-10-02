@@ -1,6 +1,7 @@
 // Страница «Все привычки».
 // Верхняя форма — только добавление новых привычек.
 // Редактирование — в модальном окне (открывается по «✎»).
+// В форме добавления — проверка: название короче 2 символов → ошибка.
 
 import { useState } from 'react';
 import HabitItem from '../components/HabitItem';
@@ -11,7 +12,14 @@ const emptyForm = { title: '', icon: '✅', color: '#22c55e' };
 export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
   // --- Форма добавления ---
   const [form, setForm] = useState(emptyForm);
-  const isValid = form.title.trim().length > 0;
+
+  // Ошибка формы: показываем только если пользователь уже начал вводить,
+  // но длина меньше 2 символов. Пустое поле — не ошибка, просто disabled.
+  const trimmed = form.title.trim();
+  const showMinLengthError = trimmed.length > 0 && trimmed.length < 2;
+
+  // Кнопка активна только при валидном названии (>= 2 символов)
+  const isValid = trimmed.length >= 2;
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -19,7 +27,7 @@ export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
 
     onAdd({
       id: 'h_' + Date.now(),
-      title: form.title.trim(),
+      title: trimmed,
       icon: form.icon || '✅',
       color: form.color,
       createdAt: new Date().toISOString().slice(0, 10),
@@ -28,8 +36,6 @@ export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
   };
 
   // --- Модалка редактирования ---
-  // editing = null  → модалка закрыта
-  // editing = { id, title, icon, color } → открыта с текущими значениями
   const [editing, setEditing] = useState(null);
 
   const openEdit = (habit) =>
@@ -42,7 +48,7 @@ export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
 
   const closeEdit = () => setEditing(null);
 
-  const isEditValid = editing?.title.trim().length > 0;
+  const isEditValid = editing?.title.trim().length >= 2;
 
   const handleSaveEdit = (e) => {
     e.preventDefault();
@@ -66,13 +72,24 @@ export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
         className="mb-6 space-y-3 rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800"
       >
         <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Название привычки"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900"
-          />
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Название привычки"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              className={`w-full rounded-lg border px-3 py-2 text-sm dark:bg-slate-900 ${
+                showMinLengthError
+                  ? 'border-red-500 dark:border-red-500'
+                  : 'border-slate-300 dark:border-slate-600'
+              }`}
+            />
+            {/* Error state формы */}
+            {showMinLengthError && (
+              <p className="mt-1 text-xs text-red-500">Минимум 2 символа</p>
+            )}
+          </div>
+
           <input
             type="text"
             maxLength={2}
@@ -121,11 +138,11 @@ export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
       {editing && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={closeEdit} // клик по фону закрывает
+          onClick={closeEdit}
         >
           <form
             onSubmit={handleSaveEdit}
-            onClick={(e) => e.stopPropagation()} // клик внутри не закрывает
+            onClick={(e) => e.stopPropagation()}
             className="w-full max-w-sm space-y-4 rounded-2xl bg-white p-5 shadow-lg dark:bg-slate-800"
           >
             <h2 className="text-lg font-semibold">Изменить привычку</h2>
