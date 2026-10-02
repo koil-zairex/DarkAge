@@ -10,22 +10,20 @@ export default function HabitItem({
 }) {
   return (
     <div className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm dark:bg-slate-800">
+      {/* Иконка с цветным фоном */}
       <div
         className="flex h-10 w-10 items-center justify-center rounded-lg text-lg"
-        style={{ backgroundColor: habit.color + '22' }}
+        style={{ backgroundColor: habit.color + '22' }} // легкий оттенок
       >
         {habit.icon}
       </div>
 
+      {/* Название */}
       <div className="flex-1">
         <div className="font-medium">{habit.title}</div>
-        {habit.createdAt && (
-          <div className="text-xs text-slate-400">
-            с {habit.createdAt}
-          </div>
-        )}
       </div>
 
+      {/* Чекбокс «выполнено» — рендерим только если передан onToggle */}
       {onToggle && (
         <button
           onClick={onToggle}
@@ -40,6 +38,7 @@ export default function HabitItem({
         </button>
       )}
 
+      {/* Кнопки edit/delete — только если переданы обработчики */}
       {onEdit && (
         <button
           onClick={onEdit}

@@ -4,6 +4,7 @@
 
 import { toISODate } from '../mockHabits';
 
+// Собираем массив последних N дат (включая сегодня), от старых к новым
 function lastNDays(n) {
   const arr = [];
   for (let i = n - 1; i >= 0; i--) {
@@ -14,6 +15,8 @@ function lastNDays(n) {
   return arr;
 }
 
+// Текущая серия: сколько дней подряд (включая сегодня) привычка выполнена.
+// Если сегодня ещё не отмечено — серия считается до вчера.
 function currentStreak(entries, habitId) {
   const doneSet = new Set(
     entries.filter((e) => e.habitId === habitId && e.completed).map((e) => e.date)
@@ -30,6 +33,7 @@ function currentStreak(entries, habitId) {
   return streak;
 }
 
+// Лучшая серия: самый длинный подряд идущий отрезок выполненных дней
 function bestStreak(entries, habitId) {
   const dates = entries
     .filter((e) => e.habitId === habitId && e.completed)
@@ -53,6 +57,7 @@ function bestStreak(entries, habitId) {
   return best;
 }
 
+// % выполнения за последние N дней
 function completionRate(entries, habitId, days) {
   const range = lastNDays(days);
   const done = range.filter((date) =>
@@ -64,11 +69,18 @@ function completionRate(entries, habitId, days) {
 }
 
 export default function StatsPage({ habits, entries }) {
+  // Empty state в стиле TodayPage — карточка с пунктирной рамкой
   if (habits.length === 0) {
     return (
-      <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-        Нет данных для статистики. Добавьте привычки.
-      </p>
+      <section>
+        <h1 className="mb-4 text-2xl font-semibold">Статистика</h1>
+        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
+          <p className="text-lg font-medium">Нет данных для статистики</p>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Перейдите во вкладку «Все привычки» и добавьте первую.
+          </p>
+        </div>
+      </section>
     );
   }
 
