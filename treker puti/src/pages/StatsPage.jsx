@@ -1,8 +1,9 @@
 // «Статистика». Главное действие — переключатель периода.
-// Все цвета через CSS-переменные — работают в обеих темах.
+// Под каждой карточкой — ссылка «Подробнее», открывающая модалку с графиками.
 
 import { useState } from 'react';
 import { toISODate } from '../mockHabits';
+import HabitDetailsModal from '../components/HabitDetailsModal';
 
 const PERIODS = [
   { id: 'week',  label: '7 дней',    days: 7 },
@@ -97,7 +98,9 @@ export default function StatsPage({ habits, entries }) {
   const [periodId, setPeriodId] = useState('week');
   const period = PERIODS.find((p) => p.id === periodId);
 
-  // Empty state
+  // Привычка, для которой открыта модалка. null = закрыта
+  const [detailsHabit, setDetailsHabit] = useState(null);
+
   if (habits.length === 0) {
     return (
       <section>
@@ -189,10 +192,28 @@ export default function StatsPage({ habits, entries }) {
                   </div>
                 </div>
               </div>
+
+              {/* Кнопка «Подробнее» — приглушённая */}
+              <button
+                onClick={() => setDetailsHabit(habit)}
+                className="mt-4 text-sm underline-offset-2 hover:underline"
+                style={{ color: 'var(--muted)' }}
+              >
+                Подробнее
+              </button>
             </li>
           );
         })}
       </ul>
+
+      {/* Модалка с деталями */}
+      {detailsHabit && (
+        <HabitDetailsModal
+          habit={detailsHabit}
+          entries={entries}
+          onClose={() => setDetailsHabit(null)}
+        />
+      )}
     </section>
   );
 }
