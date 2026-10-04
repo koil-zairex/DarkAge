@@ -1,47 +1,28 @@
-// Страница «Настройки».
-// Переключение темы одной кнопкой и сброс данных.
+// «Настройки». Главное действие — сброс данных.
+// Переключатель темы убран: палитра фиксированная.
 
-export default function SettingsPage({ theme, setTheme, onReset }) {
+export default function SettingsPage({ onReset }) {
   const handleReset = () => {
-    // Простое подтверждение без отдельной модалки
-    const ok = window.confirm('Сбросить все данные и вернуть моки?');
-    if (ok) onReset();
+    if (window.confirm('Сбросить все данные и вернуть стартовый набор?')) {
+      onReset();
+    }
   };
-
-  // Текст и иконка кнопки зависят от текущей темы:
-  // если светлая — предлагаем перейти в тёмную, и наоборот.
-  const isDark = theme === 'dark';
-  const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
 
   return (
     <section>
-      <h1 className="mb-4 text-2xl font-semibold">Настройки</h1>
+      <h1 className="text-2xl font-semibold">Настройки</h1>
 
-      <div className="space-y-4">
-        {/* Тема — одна кнопка-переключатель */}
-        <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800">
-          <div className="mb-2 font-medium">Тема</div>
-          <button
-            onClick={toggleTheme}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm transition hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-700"
-          >
-            {isDark ? '☀️ Включить Светлую' : '🌙 Включить Тёмную'}
-          </button>
-        </div>
-
-        {/* Сброс данных */}
-        <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800">
-          <div className="mb-2 font-medium">Данные</div>
-          <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
-            Сброс вернёт стартовый набор привычек и удалит все отметки.
-          </p>
-          <button
-            onClick={handleReset}
-            className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600"
-          >
-            Сбросить данные
-          </button>
-        </div>
+      <div className="mt-6 rounded-lg border border-[#e5e7eb] p-6">
+        <div className="text-base">Данные</div>
+        <p className="mt-1 text-sm text-[#6b7280]">
+          Сброс вернёт стартовый набор привычек и удалит все отметки.
+        </p>
+        <button
+          onClick={handleReset}
+          className="mt-4 rounded-lg bg-[#16a34a] px-4 py-2 text-sm font-medium text-white hover:bg-[#15803d]"
+        >
+          Сбросить данные
+        </button>
       </div>
     </section>
   );

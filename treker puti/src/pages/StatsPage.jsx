@@ -1,19 +1,15 @@
-// Страница «Статистика».
-// Переключатель периода: 7 дней / месяц / всё время.
-// Процент считается от количества прошедших дней с момента создания привычки,
-// а не от фиксированного окна. Будущие дни в расчёт не берутся.
+// «Статистика». Главное действие — переключатель периода.
+// Цифры спокойные, три колонки в ряд, без цветных плашек.
 
 import { useState } from 'react';
 import { toISODate } from '../mockHabits';
 
-// Опции периода: значение в днях (null = всё время) + подпись
 const PERIODS = [
   { id: 'week',  label: '7 дней',    days: 7 },
   { id: 'month', label: 'Месяц',     days: 30 },
   { id: 'all',   label: 'Всё время', days: null },
 ];
 
-// Собираем массив последних N дат (включая сегодня), от старых к новым
 function lastNDays(n) {
   const arr = [];
   for (let i = n - 1; i >= 0; i--) {
@@ -24,9 +20,8 @@ function lastNDays(n) {
   return arr;
 }
 
-// Сколько прошло дней между двумя датами (включительно).
-// created — 'YYYY-MM-DD' или undefined (тогда считаем, что привычка существует давно).
-// Возвращает число дней, но не больше maxDays и не меньше 1.
+// Сколько реально прошло дней с момента создания привычки
+// (не больше окна периода). Будущие дни не считаются.
 function elapsedDays(created, maxDays) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -36,39 +31,30 @@ function elapsedDays(created, maxDays) {
     start = new Date(created);
     start.setHours(0, 0, 0, 0);
   } else {
-    // Нет даты создания — считаем, что привычка существует весь период
     start = new Date(today);
     start.setDate(start.getDate() - (maxDays ?? 365));
   }
 
-  // Разница в днях + 1 (день создания считается прошедшим днём)
-  const diffMs = today - start;
-  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
-
-  if (days < 1) return 1;                    // на всякий случай
-  if (maxDays == null) return days;          // «всё время»
-  return Math.min(days, maxDays);            // не больше окна периода
+  const days = Math.floor((today - start) / 86400000) + 1;
+  if (days < 1) return 1;
+  if (maxDays == null) return days;
+  return Math.min(days, maxDays);
 }
 
-// Текущая серия: сколько дней подряд (включая сегодня) привычка выполнена.
-// Если сегодня ещё не отмечено — серия считается до вчера.
 function currentStreak(entries, habitId) {
-  const doneSet = new Set(
+  const done = new Set(
     entries.filter((e) => e.habitId === habitId && e.completed).map((e) => e.date)
   );
-
   let streak = 0;
   const d = new Date();
-  if (!doneSet.has(toISODate(d))) d.setDate(d.getDate() - 1);
-
-  while (doneSet.has(toISODate(d))) {
+  if (!done.has(toISODate(d))) d.setDate(d.getDate() - 1);
+  while (done.has(toISODate(d))) {
     streak++;
     d.setDate(d.getDate() - 1);
   }
   return streak;
 }
 
-// Лучшая серия: самый длинный подряд идущий отрезок выполненных дней
 function bestStreak(entries, habitId) {
   const dates = entries
     .filter((e) => e.habitId === habitId && e.completed)
@@ -81,7 +67,7 @@ function bestStreak(entries, habitId) {
 
   for (const date of dates) {
     if (prev) {
-      const diff = (new Date(date) - new Date(prev)) / (1000 * 60 * 60 * 24);
+      const diff = (new Date(date) - new Date(prev)) / 86400000;
       cur = diff === 1 ? cur + 1 : 1;
     } else {
       cur = 1;
@@ -92,38 +78,36 @@ function bestStreak(entries, habitId) {
   return best;
 }
 
-// % выполнения за период с учётом даты создания привычки.
-// days = null → весь период с createdAt до сегодня.
 function completionRate(entries, habit, days) {
-  // Сколько дней реально прошло (не больше периода и не больше жизни привычки)
   const elapsed = elapsedDays(habit.createdAt, days);
-
-  // Список дат для расчёта: последние `elapsed` дней включая сегодня
   const range = lastNDays(elapsed);
-
   const done = range.filter((date) =>
-    entries.some(
-      (e) => e.habitId === habit.id && e.date === date && e.completed
-    )
+    entries.some((e) => e.habitId === habit.id && e.date === date && e.completed)
   ).length;
-
   return Math.round((done / elapsed) * 100);
 }
 
+function pluralDays(n) {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return 'день';
+  if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return 'дня';
+  return 'дней';
+}
+
 export default function StatsPage({ habits, entries }) {
-  // Текущий период — по умолчанию 7 дней
   const [periodId, setPeriodId] = useState('week');
   const period = PERIODS.find((p) => p.id === periodId);
 
-  // Empty state в стиле TodayPage — карточка с пунктирной рамкой
+  // Empty state
   if (habits.length === 0) {
     return (
       <section>
-        <h1 className="mb-4 text-2xl font-semibold">Статистика</h1>
-        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
-          <p className="text-lg font-medium">Нет данных для статистики</p>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Перейдите во вкладку «Все привычки» и добавьте первую.
+        <h1 className="text-2xl font-semibold">Статистика</h1>
+        <div className="mt-6 rounded-lg border border-dashed border-[#e5e7eb] p-6 text-center">
+          <p className="text-base">Нет данных для статистики</p>
+          <p className="mt-1 text-sm text-[#6b7280]">
+            Перейдите во вкладку «Привычки» и добавьте первую.
           </p>
         </div>
       </section>
@@ -132,20 +116,20 @@ export default function StatsPage({ habits, entries }) {
 
   return (
     <section>
-      <h1 className="mb-4 text-2xl font-semibold">Статистика</h1>
+      <h1 className="text-2xl font-semibold">Статистика</h1>
 
-      {/* Переключатель периода */}
-      <div className="mb-4 flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+      {/* Переключатель периода — главное действие экрана */}
+      <div className="mt-6 flex gap-2">
         {PERIODS.map((p) => {
           const active = p.id === periodId;
           return (
             <button
               key={p.id}
               onClick={() => setPeriodId(p.id)}
-              className={`flex-1 rounded-lg px-3 py-1.5 text-sm transition ${
+              className={`rounded-lg border px-3 py-2 text-sm transition ${
                 active
-                  ? 'bg-white font-medium shadow-sm dark:bg-slate-700'
-                  : 'text-slate-600 hover:bg-white/60 dark:text-slate-300 dark:hover:bg-slate-700/60'
+                  ? 'border-[#16a34a] bg-[#16a34a] font-medium text-white'
+                  : 'border-[#e5e7eb] text-[#6b7280] hover:text-[#1a1a1a]'
               }`}
             >
               {p.label}
@@ -154,11 +138,7 @@ export default function StatsPage({ habits, entries }) {
         })}
       </div>
 
-      <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
-        Проценты считаются от количества прошедших дней с момента создания привычки.
-      </p>
-
-      <ul className="space-y-3">
+      <ul className="mt-6 space-y-2">
         {habits.map((habit) => {
           const cs = currentStreak(entries, habit.id);
           const bs = bestStreak(entries, habit.id);
@@ -168,29 +148,26 @@ export default function StatsPage({ habits, entries }) {
           return (
             <li
               key={habit.id}
-              className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800"
+              className="rounded-lg border border-[#e5e7eb] bg-white p-4"
             >
-              <div className="mb-2 flex items-center gap-2">
-                <span className="text-xl">{habit.icon}</span>
-                <span className="font-medium">{habit.title}</span>
-              </div>
+              <div className="text-base">{habit.title}</div>
 
-              <div className="grid grid-cols-3 gap-2 text-center text-sm">
-                <div className="rounded-lg bg-slate-100 p-2 dark:bg-slate-700">
+              <div className="mt-4 grid grid-cols-3 gap-4">
+                <div>
                   <div className="text-lg font-semibold">{cs}</div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
+                  <div className="mt-1 text-sm text-[#6b7280]">
                     текущая серия
                   </div>
                 </div>
-                <div className="rounded-lg bg-slate-100 p-2 dark:bg-slate-700">
+                <div>
                   <div className="text-lg font-semibold">{bs}</div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
+                  <div className="mt-1 text-sm text-[#6b7280]">
                     лучшая серия
                   </div>
                 </div>
-                <div className="rounded-lg bg-slate-100 p-2 dark:bg-slate-700">
+                <div>
                   <div className="text-lg font-semibold">{rate}%</div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
+                  <div className="mt-1 text-sm text-[#6b7280]">
                     за {elapsed} {pluralDays(elapsed)}
                   </div>
                 </div>
@@ -201,13 +178,4 @@ export default function StatsPage({ habits, entries }) {
       </ul>
     </section>
   );
-}
-
-// Хелпер для подписи под процентом: «1 день», «3 дня», «7 дней»
-function pluralDays(n) {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'день';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'дня';
-  return 'дней';
 }

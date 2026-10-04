@@ -1,127 +1,84 @@
-// Страница «Все привычки».
-// Верхняя форма — только добавление новых привычек.
-// Редактирование — в модальном окне (открывается по «✎»).
-// В форме добавления — проверка: название короче 2 символов → ошибка.
+// «Привычки». Главное действие — «Добавить».
+// Форма добавления компактная, ниже — список с приглушёнными «Изменить» / «Удалить».
+// Ошибка валидации — красный текст #dc2626.
 
 import { useState } from 'react';
 import HabitItem from '../components/HabitItem';
 
-// Пустая форма для добавления
-const emptyForm = { title: '', icon: '✅', color: '#22c55e' };
+const emptyForm = { title: '' };
 
 export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
-  // --- Форма добавления ---
   const [form, setForm] = useState(emptyForm);
 
-  // Ошибка формы: показываем только если пользователь уже начал вводить,
-  // но длина меньше 2 символов. Пустое поле — не ошибка, просто disabled.
   const trimmed = form.title.trim();
   const showMinLengthError = trimmed.length > 0 && trimmed.length < 2;
-
-  // Кнопка активна только при валидном названии (>= 2 символов)
   const isValid = trimmed.length >= 2;
 
   const handleAdd = (e) => {
     e.preventDefault();
     if (!isValid) return;
-
     onAdd({
       id: 'h_' + Date.now(),
       title: trimmed,
-      icon: form.icon || '✅',
-      color: form.color,
+      icon: '',
+      color: '#16a34a',
       createdAt: new Date().toISOString().slice(0, 10),
     });
     setForm(emptyForm);
   };
 
-  // --- Модалка редактирования ---
+  // Модалка редактирования
   const [editing, setEditing] = useState(null);
-
-  const openEdit = (habit) =>
-    setEditing({
-      id: habit.id,
-      title: habit.title,
-      icon: habit.icon,
-      color: habit.color,
-    });
-
+  const openEdit = (habit) => setEditing({ id: habit.id, title: habit.title });
   const closeEdit = () => setEditing(null);
-
   const isEditValid = editing?.title.trim().length >= 2;
 
   const handleSaveEdit = (e) => {
     e.preventDefault();
     if (!isEditValid) return;
-
-    onUpdate(editing.id, {
-      title: editing.title.trim(),
-      icon: editing.icon || '✅',
-      color: editing.color,
-    });
+    onUpdate(editing.id, { title: editing.title.trim() });
     closeEdit();
   };
 
   return (
     <section>
-      <h1 className="mb-4 text-2xl font-semibold">Все привычки</h1>
+      <h1 className="text-2xl font-semibold">Привычки</h1>
 
       {/* Форма добавления */}
-      <form
-        onSubmit={handleAdd}
-        className="mb-6 space-y-3 rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800"
-      >
-        <div className="flex gap-2">
+      <form onSubmit={handleAdd} className="mt-6">
+        <label className="block text-sm text-[#6b7280]">Новая привычка</label>
+        <div className="mt-2 flex gap-2">
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Название привычки"
+              placeholder="Название"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className={`w-full rounded-lg border px-3 py-2 text-sm dark:bg-slate-900 ${
-                showMinLengthError
-                  ? 'border-red-500 dark:border-red-500'
-                  : 'border-slate-300 dark:border-slate-600'
+              className={`w-full rounded-lg border px-3 py-2 text-base outline-none focus:border-[#16a34a] ${
+                showMinLengthError ? 'border-[#dc2626]' : 'border-[#e5e7eb]'
               }`}
             />
-            {/* Error state формы */}
             {showMinLengthError && (
-              <p className="mt-1 text-xs text-red-500">Минимум 2 символа</p>
+              <p className="mt-1 text-sm text-[#dc2626]">Минимум 2 символа</p>
             )}
           </div>
-
-          <input
-            type="text"
-            maxLength={2}
-            placeholder="🙂"
-            value={form.icon}
-            onChange={(e) => setForm({ ...form, icon: e.target.value })}
-            className="w-14 rounded-lg border border-slate-300 px-2 py-2 text-center text-sm dark:border-slate-600 dark:bg-slate-900"
-          />
-          <input
-            type="color"
-            value={form.color}
-            onChange={(e) => setForm({ ...form, color: e.target.value })}
-            className="h-10 w-12 cursor-pointer rounded-lg border border-slate-300 dark:border-slate-600"
-          />
+          <button
+            type="submit"
+            disabled={!isValid}
+            className="rounded-lg bg-[#16a34a] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#15803d] disabled:cursor-not-allowed disabled:bg-[#e5e7eb] disabled:text-[#6b7280]"
+          >
+            Добавить
+          </button>
         </div>
-
-        <button
-          type="submit"
-          disabled={!isValid}
-          className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          Добавить
-        </button>
       </form>
 
-      {/* Список всех привычек */}
+      {/* Список */}
       {habits.length === 0 ? (
-        <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+        <p className="mt-6 text-sm text-[#6b7280]">
           Список пуст. Добавьте первую привычку выше.
         </p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="mt-6 space-y-2">
           {habits.map((habit) => (
             <li key={habit.id}>
               <HabitItem
@@ -137,57 +94,38 @@ export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
       {/* Модалка редактирования */}
       {editing && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#1a1a1a]/40 p-6"
           onClick={closeEdit}
         >
           <form
             onSubmit={handleSaveEdit}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm space-y-4 rounded-2xl bg-white p-5 shadow-lg dark:bg-slate-800"
+            className="w-full max-w-sm rounded-lg bg-white p-6"
           >
             <h2 className="text-lg font-semibold">Изменить привычку</h2>
 
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Название"
-                value={editing.title}
-                onChange={(e) =>
-                  setEditing({ ...editing, title: e.target.value })
-                }
-                className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900"
-              />
-              <input
-                type="text"
-                maxLength={2}
-                value={editing.icon}
-                onChange={(e) =>
-                  setEditing({ ...editing, icon: e.target.value })
-                }
-                className="w-14 rounded-lg border border-slate-300 px-2 py-2 text-center text-sm dark:border-slate-600 dark:bg-slate-900"
-              />
-              <input
-                type="color"
-                value={editing.color}
-                onChange={(e) =>
-                  setEditing({ ...editing, color: e.target.value })
-                }
-                className="h-10 w-12 cursor-pointer rounded-lg border border-slate-300 dark:border-slate-600"
-              />
-            </div>
+            <label className="mt-4 block text-sm text-[#6b7280]">Название</label>
+            <input
+              type="text"
+              value={editing.title}
+              onChange={(e) =>
+                setEditing({ ...editing, title: e.target.value })
+              }
+              className="mt-2 w-full rounded-lg border border-[#e5e7eb] px-3 py-2 text-base outline-none focus:border-[#16a34a]"
+            />
 
-            <div className="flex justify-end gap-2">
+            <div className="mt-6 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={closeEdit}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm dark:border-slate-600"
+                className="rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm text-[#6b7280] hover:text-[#1a1a1a]"
               >
                 Отмена
               </button>
               <button
                 type="submit"
                 disabled={!isEditValid}
-                className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-lg bg-[#16a34a] px-4 py-2 text-sm font-medium text-white hover:bg-[#15803d] disabled:cursor-not-allowed disabled:bg-[#e5e7eb] disabled:text-[#6b7280]"
               >
                 Сохранить
               </button>
