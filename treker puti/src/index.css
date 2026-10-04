@@ -2,17 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Базовые стили приложения */
+/* Цветовые токены: светлая тема по умолчанию */
+:root {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --text: #1a1a1a;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #16a34a;
+  --accent-hover: #15803d;
+  --danger: #dc2626;
+}
+
+/* Тёмная тема включается классом .dark на <html> */
+html.dark {
+  --bg: #0f1115;
+  --surface: #171a21;
+  --text: #f3f4f6;
+  --muted: #9ca3af;
+  --border: #262b34;
+  --accent: #16a34a;
+  --accent-hover: #15803d;
+  --danger: #f87171;
+}
+
+/* Базовые стили */
 html,
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: #1a1a1a;
-  background: #ffffff;
+  color: var(--text);
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Убираем синюю подсветку тапов на мобильных */
 * {
   -webkit-tap-highlight-color: transparent;
 }

@@ -1,40 +1,45 @@
 // Карточка привычки.
-// Иконка-эмодзи убрана — вместо неё нейтральная точка.
-// Цвет привычки больше не используется — палитра фиксированная.
+// Чекбокс крупнее, с заметной рамкой и галочкой в обоих состояниях.
 
 export default function HabitItem({ habit, checked, onToggle, onEdit, onDelete }) {
   return (
-    <div className="flex items-center gap-4 rounded-lg border border-[#e5e7eb] bg-white p-4">
+    <div
+      className="flex items-center gap-4 rounded-lg border p-4"
+      style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
+    >
       {/* Маркер привычки */}
       <span
         aria-hidden
-        className="h-2 w-2 shrink-0 rounded-full bg-[#16a34a]"
+        className="h-2 w-2 shrink-0 rounded-full"
+        style={{ background: 'var(--accent)' }}
       />
 
       {/* Название */}
       <div className="flex-1 text-base">{habit.title}</div>
 
-      {/* Чекбокс «выполнено» — главное действие на «Сегодня» */}
+      {/* Чекбокс «выполнено» — крупный и заметный */}
       {onToggle && (
         <button
           onClick={onToggle}
           aria-label={checked ? 'Отменить' : 'Отметить'}
           aria-pressed={checked}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg border text-sm transition ${
-            checked
-              ? 'border-[#16a34a] bg-[#16a34a] text-white'
-              : 'border-[#e5e7eb] bg-white text-transparent hover:border-[#16a34a]'
-          }`}
+          className="flex h-10 w-10 items-center justify-center rounded-lg border-2 text-base font-medium transition"
+          style={{
+            borderColor: checked ? 'var(--accent)' : 'var(--border)',
+            background: checked ? 'var(--accent)' : 'transparent',
+            color: checked ? '#ffffff' : 'var(--muted)',
+          }}
         >
           ✓
         </button>
       )}
 
-      {/* Второстепенные действия — приглушены */}
+      {/* Второстепенные действия */}
       {onEdit && (
         <button
           onClick={onEdit}
-          className="rounded-lg px-2 py-1 text-sm text-[#6b7280] hover:text-[#1a1a1a]"
+          className="rounded-lg px-2 py-1 text-sm hover:opacity-80"
+          style={{ color: 'var(--muted)' }}
         >
           Изменить
         </button>
@@ -42,7 +47,8 @@ export default function HabitItem({ habit, checked, onToggle, onEdit, onDelete }
       {onDelete && (
         <button
           onClick={onDelete}
-          className="rounded-lg px-2 py-1 text-sm text-[#6b7280] hover:text-[#1a1a1a]"
+          className="rounded-lg px-2 py-1 text-sm hover:opacity-80"
+          style={{ color: 'var(--muted)' }}
         >
           Удалить
         </button>

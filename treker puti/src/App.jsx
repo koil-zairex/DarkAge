@@ -1,6 +1,6 @@
 // Корневой компонент.
-// loading 1 сек при первой загрузке, затем приложение.
-// Тема фиксированная — светлая.
+// loading 1 сек при первой загрузке.
+// Тема: 'light' | 'dark', хранится в localStorage, класс на <html>.
 
 import { useEffect, useState } from 'react';
 import { loadState, saveState } from './storage';
@@ -17,18 +17,29 @@ export default function App() {
   const [page, setPage] = useState('today');
   const [loading, setLoading] = useState(true);
 
-  // Показываем экран загрузки 1 секунду
+  // Тема
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem('habit-theme') || 'light'
+  );
+
+  // Загрузка 1 секунду
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 1000);
     return () => clearTimeout(t);
   }, []);
 
-  // Сохраняем в localStorage при любом изменении
+  // Сохранение данных
   useEffect(() => {
     saveState({ habits, entries });
   }, [habits, entries]);
 
-  // --- Действия над привычками ---
+  // Применяем тему к <html>
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('habit-theme', theme);
+  }, [theme]);
+
+  // --- Действия ---
   const addHabit = (habit) => setHabits((prev) => [...prev, habit]);
 
   const updateHabit = (id, patch) =>
@@ -39,7 +50,6 @@ export default function App() {
     setEntries((prev) => prev.filter((e) => e.habitId !== id));
   };
 
-  // --- Отметка выполнения за конкретную дату ---
   const toggleEntry = (habitId, date) => {
     setEntries((prev) => {
       const existing = prev.find((e) => e.habitId === habitId && e.date === date);
@@ -54,7 +64,6 @@ export default function App() {
     });
   };
 
-  // --- Полный сброс к мокам ---
   const resetAll = () => {
     const fresh = loadState();
     setHabits(fresh.habits);
@@ -64,15 +73,27 @@ export default function App() {
   // Экран загрузки
   if (loading) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white text-[#6b7280]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#e5e7eb] border-t-[#16a34a]" />
+      <div
+        className="flex min-h-screen flex-col items-center justify-center gap-4"
+        style={{ background: 'var(--bg)', color: 'var(--muted)' }}
+      >
+        <div
+          className="h-8 w-8 animate-spin rounded-full border-2"
+          style={{
+            borderColor: 'var(--border)',
+            borderTopColor: 'var(--accent)',
+          }}
+        />
         <p className="text-sm">Загрузка…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#1a1a1a]">
+    <div
+      className="min-h-screen"
+      style={{ background: 'var(--bg)', color: 'var(--text)' }}
+    >
       <NavBar page={page} setPage={setPage} />
 
       <main className="mx-auto max-w-2xl px-6 py-8">
@@ -91,7 +112,9 @@ export default function App() {
 
         {page === 'stats' && <StatsPage habits={habits} entries={entries} />}
 
-        {page === 'settings' && <SettingsPage onReset={resetAll} />}
+        {page === 'settings' && (
+          <SettingsPage theme={theme} setTheme={setTheme} onReset={resetAll} />
+        )}
       </main>
     </div>
   );
