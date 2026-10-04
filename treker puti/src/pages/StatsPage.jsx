@@ -1,5 +1,5 @@
 // «Статистика». Главное действие — переключатель периода.
-// Цифры спокойные, три колонки в ряд, без цветных плашек.
+// Все цвета через CSS-переменные — работают в обеих темах.
 
 import { useState } from 'react';
 import { toISODate } from '../mockHabits';
@@ -20,8 +20,6 @@ function lastNDays(n) {
   return arr;
 }
 
-// Сколько реально прошло дней с момента создания привычки
-// (не больше окна периода). Будущие дни не считаются.
 function elapsedDays(created, maxDays) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -104,9 +102,12 @@ export default function StatsPage({ habits, entries }) {
     return (
       <section>
         <h1 className="text-2xl font-semibold">Статистика</h1>
-        <div className="mt-6 rounded-lg border border-dashed border-[#e5e7eb] p-6 text-center">
+        <div
+          className="mt-6 rounded-lg border border-dashed p-6 text-center"
+          style={{ borderColor: 'var(--border)' }}
+        >
           <p className="text-base">Нет данных для статистики</p>
-          <p className="mt-1 text-sm text-[#6b7280]">
+          <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>
             Перейдите во вкладку «Привычки» и добавьте первую.
           </p>
         </div>
@@ -118,7 +119,7 @@ export default function StatsPage({ habits, entries }) {
     <section>
       <h1 className="text-2xl font-semibold">Статистика</h1>
 
-      {/* Переключатель периода — главное действие экрана */}
+      {/* Переключатель периода */}
       <div className="mt-6 flex gap-2">
         {PERIODS.map((p) => {
           const active = p.id === periodId;
@@ -127,10 +128,13 @@ export default function StatsPage({ habits, entries }) {
               key={p.id}
               onClick={() => setPeriodId(p.id)}
               className={`rounded-lg border px-3 py-2 text-sm transition ${
-                active
-                  ? 'border-[#16a34a] bg-[#16a34a] font-medium text-white'
-                  : 'border-[#e5e7eb] text-[#6b7280] hover:text-[#1a1a1a]'
+                active ? 'font-medium text-white' : ''
               }`}
+              style={{
+                borderColor: active ? 'var(--accent)' : 'var(--border)',
+                background: active ? 'var(--accent)' : 'transparent',
+                color: active ? '#ffffff' : 'var(--muted)',
+              }}
             >
               {p.label}
             </button>
@@ -148,26 +152,39 @@ export default function StatsPage({ habits, entries }) {
           return (
             <li
               key={habit.id}
-              className="rounded-lg border border-[#e5e7eb] bg-white p-4"
+              className="rounded-lg border p-4"
+              style={{
+                borderColor: 'var(--border)',
+                background: 'var(--surface)',
+              }}
             >
               <div className="text-base">{habit.title}</div>
 
               <div className="mt-4 grid grid-cols-3 gap-4">
                 <div>
                   <div className="text-lg font-semibold">{cs}</div>
-                  <div className="mt-1 text-sm text-[#6b7280]">
+                  <div
+                    className="mt-1 text-sm"
+                    style={{ color: 'var(--muted)' }}
+                  >
                     текущая серия
                   </div>
                 </div>
                 <div>
                   <div className="text-lg font-semibold">{bs}</div>
-                  <div className="mt-1 text-sm text-[#6b7280]">
+                  <div
+                    className="mt-1 text-sm"
+                    style={{ color: 'var(--muted)' }}
+                  >
                     лучшая серия
                   </div>
                 </div>
                 <div>
                   <div className="text-lg font-semibold">{rate}%</div>
-                  <div className="mt-1 text-sm text-[#6b7280]">
+                  <div
+                    className="mt-1 text-sm"
+                    style={{ color: 'var(--muted)' }}
+                  >
                     за {elapsed} {pluralDays(elapsed)}
                   </div>
                 </div>

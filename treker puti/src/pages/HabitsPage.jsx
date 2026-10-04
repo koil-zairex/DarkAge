@@ -1,6 +1,5 @@
 // «Привычки». Главное действие — «Добавить».
-// Форма добавления компактная, ниже — список с приглушёнными «Изменить» / «Удалить».
-// Ошибка валидации — красный текст #dc2626.
+// Все цвета через CSS-переменные — работают в обеих темах.
 
 import { useState } from 'react';
 import HabitItem from '../components/HabitItem';
@@ -46,7 +45,9 @@ export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
 
       {/* Форма добавления */}
       <form onSubmit={handleAdd} className="mt-6">
-        <label className="block text-sm text-[#6b7280]">Новая привычка</label>
+        <label className="block text-sm" style={{ color: 'var(--muted)' }}>
+          Новая привычка
+        </label>
         <div className="mt-2 flex gap-2">
           <div className="flex-1">
             <input
@@ -54,18 +55,27 @@ export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
               placeholder="Название"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className={`w-full rounded-lg border px-3 py-2 text-base outline-none focus:border-[#16a34a] ${
-                showMinLengthError ? 'border-[#dc2626]' : 'border-[#e5e7eb]'
-              }`}
+              className="w-full rounded-lg border px-3 py-2 text-base outline-none"
+              style={{
+                borderColor: showMinLengthError ? 'var(--danger)' : 'var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+              }}
             />
             {showMinLengthError && (
-              <p className="mt-1 text-sm text-[#dc2626]">Минимум 2 символа</p>
+              <p className="mt-1 text-sm" style={{ color: 'var(--danger)' }}>
+                Минимум 2 символа
+              </p>
             )}
           </div>
           <button
             type="submit"
             disabled={!isValid}
-            className="rounded-lg bg-[#16a34a] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#15803d] disabled:cursor-not-allowed disabled:bg-[#e5e7eb] disabled:text-[#6b7280]"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed"
+            style={{
+              background: isValid ? 'var(--accent)' : 'var(--border)',
+              color: isValid ? '#ffffff' : 'var(--muted)',
+            }}
           >
             Добавить
           </button>
@@ -74,7 +84,7 @@ export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
 
       {/* Список */}
       {habits.length === 0 ? (
-        <p className="mt-6 text-sm text-[#6b7280]">
+        <p className="mt-6 text-sm" style={{ color: 'var(--muted)' }}>
           Список пуст. Добавьте первую привычку выше.
         </p>
       ) : (
@@ -94,38 +104,63 @@ export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
       {/* Модалка редактирования */}
       {editing && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#1a1a1a]/40 p-6"
+          className="fixed inset-0 z-50 flex items-center justify-center p-6"
+          style={{ background: 'rgba(0,0,0,0.5)' }}
           onClick={closeEdit}
         >
           <form
             onSubmit={handleSaveEdit}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-lg bg-white p-6"
+            className="w-full max-w-sm rounded-lg border p-6"
+            style={{
+              borderColor: 'var(--border)',
+              background: 'var(--surface)',
+              color: 'var(--text)',
+            }}
           >
             <h2 className="text-lg font-semibold">Изменить привычку</h2>
 
-            <label className="mt-4 block text-sm text-[#6b7280]">Название</label>
+            <label
+              className="mt-4 block text-sm"
+              style={{ color: 'var(--muted)' }}
+            >
+              Название
+            </label>
             <input
               type="text"
               value={editing.title}
               onChange={(e) =>
                 setEditing({ ...editing, title: e.target.value })
               }
-              className="mt-2 w-full rounded-lg border border-[#e5e7eb] px-3 py-2 text-base outline-none focus:border-[#16a34a]"
+              className="mt-2 w-full rounded-lg border px-3 py-2 text-base outline-none"
+              style={{
+                borderColor: 'var(--border)',
+                background: 'var(--bg)',
+                color: 'var(--text)',
+              }}
             />
 
             <div className="mt-6 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={closeEdit}
-                className="rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm text-[#6b7280] hover:text-[#1a1a1a]"
+                className="rounded-lg border px-4 py-2 text-sm"
+                style={{
+                  borderColor: 'var(--border)',
+                  color: 'var(--muted)',
+                  background: 'transparent',
+                }}
               >
                 Отмена
               </button>
               <button
                 type="submit"
                 disabled={!isEditValid}
-                className="rounded-lg bg-[#16a34a] px-4 py-2 text-sm font-medium text-white hover:bg-[#15803d] disabled:cursor-not-allowed disabled:bg-[#e5e7eb] disabled:text-[#6b7280]"
+                className="rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed"
+                style={{
+                  background: isEditValid ? 'var(--accent)' : 'var(--border)',
+                  color: isEditValid ? '#ffffff' : 'var(--muted)',
+                }}
               >
                 Сохранить
               </button>

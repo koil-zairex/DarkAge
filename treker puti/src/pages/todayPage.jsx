@@ -1,5 +1,5 @@
 // «Сегодня». Главное действие — отметить привычку выполненной.
-// Прогресс дня — тихая строка с числом и тонкой полосой.
+// Все цвета через CSS-переменные — работают в обеих темах.
 
 import HabitItem from '../components/HabitItem';
 import { toISODate } from '../mockHabits';
@@ -18,9 +18,12 @@ export default function TodayPage({ habits, entries, onToggle }) {
     return (
       <section>
         <h1 className="text-2xl font-semibold">Сегодня</h1>
-        <div className="mt-6 rounded-lg border border-dashed border-[#e5e7eb] p-6 text-center">
+        <div
+          className="mt-6 rounded-lg border border-dashed p-6 text-center"
+          style={{ borderColor: 'var(--border)' }}
+        >
           <p className="text-base">Пока нет привычек</p>
-          <p className="mt-1 text-sm text-[#6b7280]">
+          <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>
             Перейдите во вкладку «Привычки» и добавьте первую.
           </p>
         </div>
@@ -32,7 +35,7 @@ export default function TodayPage({ habits, entries, onToggle }) {
     <section>
       <header>
         <h1 className="text-2xl font-semibold">Сегодня</h1>
-        <p className="mt-1 text-sm text-[#6b7280]">
+        <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>
           {new Date().toLocaleDateString('ru-RU', {
             weekday: 'long',
             day: 'numeric',
@@ -41,18 +44,24 @@ export default function TodayPage({ habits, entries, onToggle }) {
         </p>
       </header>
 
-      {/* Прогресс дня */}
+      {/* Прогресс дня — без плашки, просто строка и полоса */}
       <div className="mt-6">
         <div className="flex items-baseline justify-between text-sm">
-          <span className="text-[#6b7280]">Выполнено</span>
-          <span className="text-[#1a1a1a]">
+          <span style={{ color: 'var(--muted)' }}>Выполнено</span>
+          <span style={{ color: 'var(--text)' }}>
             {doneCount} из {total}
           </span>
         </div>
-        <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-[#e5e7eb]">
+        <div
+          className="mt-2 h-1 w-full overflow-hidden rounded-full"
+          style={{ background: 'var(--border)' }}
+        >
           <div
-            className="h-full bg-[#16a34a] transition-all"
-            style={{ width: `${total ? (doneCount / total) * 100 : 0}%` }}
+            className="h-full transition-all"
+            style={{
+              width: `${total ? (doneCount / total) * 100 : 0}%`,
+              background: 'var(--accent)',
+            }}
           />
         </div>
       </div>
