@@ -44,8 +44,8 @@ export default function TodayPage({ habits, entries, onToggle }) {
         </p>
       </header>
 
-      {/* Прогресс дня — без плашки, просто строка и полоса */}
-      <div className="mt-6">
+      {/* Прогресс дня — отступ mb-6 от заголовка */}
+      <div className="mb-6 mt-6">
         <div className="flex items-baseline justify-between text-sm">
           <span style={{ color: 'var(--muted)' }}>Выполнено</span>
           <span style={{ color: 'var(--text)' }}>
@@ -66,8 +66,8 @@ export default function TodayPage({ habits, entries, onToggle }) {
         </div>
       </div>
 
-      {/* Список привычек */}
-      <ul className="mt-6 space-y-2">
+      {/* Список привычек — без лишнего mt, отступ даёт mb-6 у блока выше */}
+      <ul className="space-y-2">
         {habits.map((habit) => (
           <li key={habit.id}>
             <HabitItem

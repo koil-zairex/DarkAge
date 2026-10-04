@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Цветовые токены: светлая тема по умолчанию */
 :root {
   --bg: #ffffff;
   --surface: #ffffff;
@@ -13,6 +14,7 @@
   --danger: #dc2626;
 }
 
+/* Тёмная тема включается классом .dark на <html> */
 html.dark {
   --bg: #0f1115;
   --surface: #171a21;
@@ -21,9 +23,10 @@ html.dark {
   --border: #262b34;
   --accent: #16a34a;
   --accent-hover: #15803d;
-  --danger: #f87171;
+  --danger: #dc2626; /* было #f87171 — теперь тот же красный, что и в светлой */
 }
 
+/* Базовые стили */
 html,
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;

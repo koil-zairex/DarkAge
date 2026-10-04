@@ -1,4 +1,5 @@
 // «Настройки». Переключатель темы одной кнопкой + сброс данных.
+// Сброс — опасное действие, кнопка красная #dc2626 в обеих темах.
 
 export default function SettingsPage({ theme, setTheme, onReset }) {
   const isDark = theme === 'dark';
@@ -44,7 +45,7 @@ export default function SettingsPage({ theme, setTheme, onReset }) {
         <button
           onClick={handleReset}
           className="mt-4 rounded-lg px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
-          style={{ background: 'var(--accent)' }}
+          style={{ background: '#dc2626' }}
         >
           Сбросить данные
         </button>
