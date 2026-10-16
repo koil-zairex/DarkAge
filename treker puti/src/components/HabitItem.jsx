@@ -1,5 +1,6 @@
 // Карточка привычки.
-// Чекбокс крупнее, с заметной рамкой и галочкой в обоих состояниях.
+// Слева — цветная точка-идентификатор (цвет = habit.color).
+// Справа — название и, если передан onToggle, чекбокс «выполнено».
 
 export default function HabitItem({ habit, checked, onToggle, onEdit, onDelete }) {
   return (
@@ -7,11 +8,11 @@ export default function HabitItem({ habit, checked, onToggle, onEdit, onDelete }
       className="flex items-center gap-4 rounded-lg border p-4"
       style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
     >
-      {/* Маркер привычки */}
+      {/* Цветная точка-идентификатор */}
       <span
         aria-hidden
         className="h-2 w-2 shrink-0 rounded-full"
-        style={{ background: 'var(--accent)' }}
+        style={{ background: habit.color }}
       />
 
       {/* Название */}

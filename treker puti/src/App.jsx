@@ -1,5 +1,9 @@
+// Корневой компонент.
+// loading 1 сек при первой загрузке.
+// Тема: 'light' | 'dark', хранится в localStorage, класс на <html>.
+
 import { useEffect, useState } from 'react';
-import { loadState, saveState } from './storage';
+import { loadState, saveState, clearState } from './storage';
 import NavBar from './components/NavBar';
 import TodayPage from './pages/TodayPage';
 import HabitsPage from './pages/HabitsPage';
@@ -13,31 +17,39 @@ export default function App() {
   const [page, setPage] = useState('today');
   const [loading, setLoading] = useState(true);
 
+  // Тема
   const [theme, setTheme] = useState(
     () => localStorage.getItem('habit-theme') || 'light'
   );
 
+  // Загрузка 1 секунду
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 1000);
     return () => clearTimeout(t);
   }, []);
 
+  // Сохранение данных
   useEffect(() => {
     saveState({ habits, entries });
   }, [habits, entries]);
 
+  // Применяем тему к <html>
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('habit-theme', theme);
   }, [theme]);
 
+  // --- Действия ---
   const addHabit = (habit) => setHabits((prev) => [...prev, habit]);
+
   const updateHabit = (id, patch) =>
     setHabits((prev) => prev.map((h) => (h.id === id ? { ...h, ...patch } : h)));
+
   const deleteHabit = (id) => {
     setHabits((prev) => prev.filter((h) => h.id !== id));
     setEntries((prev) => prev.filter((e) => e.habitId !== id));
   };
+
   const toggleEntry = (habitId, date) => {
     setEntries((prev) => {
       const existing = prev.find((e) => e.habitId === habitId && e.date === date);
@@ -51,12 +63,16 @@ export default function App() {
       return [...prev, { habitId, date, completed: true }];
     });
   };
+
+  // Полный сброс: сначала чистим localStorage, потом грузим моки
   const resetAll = () => {
-    const fresh = loadState();
+    clearState();               // удаляем сохранённые данные
+    const fresh = loadState();  // теперь loadState вернёт моки
     setHabits(fresh.habits);
     setEntries(fresh.entries);
   };
 
+  // Экран загрузки
   if (loading) {
     return (
       <div

@@ -1,16 +1,53 @@
-# React + Vite
+# Трекер привычек
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Веб-приложение для ежедневного отслеживания полезных привычек и прогресса.
 
-Currently, two official plugins are available:
+## Стек
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React
+- Vite
+- Tailwind CSS
+- localStorage (данные хранятся на клиенте)
 
-## React Compiler
+## Функции
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 4 экрана: Сегодня, Привычки, Статистика, Настройки
+- Отметка привычек на сегодня и прогресс дня «X из Y»
+- Добавление, редактирование и удаление привычек
+- Статистика: текущая серия, лучшая серия, процент выполнения за период (7 / 30 / всё время)
+- Светлая и тёмная тема
+- Данные сохраняются в localStorage
 
-## Expanding the ESLint configuration
+## Как запустить
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+npm run dev
+Открыть в браузере: http://localhost:5173
+
+Структура проекта
+text
+src/
+├── App.jsx              — корневой компонент, состояние и переключение страниц
+├── main.jsx             — точка входа
+├── index.css            — Tailwind
+├── mockHabits.js        — моковые данные привычек и отметок
+├── storage.js           — работа с localStorage
+├── pages/
+│   ├── TodayPage.jsx    — экран «Сегодня»
+│   ├── HabitsPage.jsx   — экран «Привычки»
+│   ├── StatsPage.jsx    — экран «Статистика»
+│   └── SettingsPage.jsx — экран «Настройки»
+└── components/
+    ├── NavBar.jsx       — навигация между страницами
+    └── HabitItem.jsx    — карточка привычки
+text
+
+### 3. Сохрани (`Ctrl + S`)
+
+### 4. Если работаешь с Git — закоммить и запушь
+
+```bash
+git add README.md
+git commit -m "docs: заменить шаблонный README на описание проекта"
+git push

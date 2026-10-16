@@ -23,7 +23,7 @@ html.dark {
   --border: #262b34;
   --accent: #16a34a;
   --accent-hover: #15803d;
-  --danger: #dc2626; /* было #f87171 — теперь тот же красный, что и в светлой */
+  --danger: #dc2626;
 }
 
 /* Базовые стили */
@@ -38,4 +38,35 @@ body {
 
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Кастомное поле выбора цвета.
+   Убирает нативную рамку браузера, подстраивается под тему. */
+.color-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 48px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+/* Chrome / Safari / Edge: убираем внутренний отступ и рамку у цветового круга */
+.color-input::-webkit-color-swatch-wrapper {
+  padding: 4px;
+}
+
+.color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
+
+/* Firefox */
+.color-input::-moz-color-swatch {
+  border: none;
+  border-radius: 4px;
 }

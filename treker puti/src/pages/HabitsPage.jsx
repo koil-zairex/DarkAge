@@ -1,10 +1,12 @@
 // «Привычки». Главное действие — «Добавить».
-// Все цвета через CSS-переменные — работают в обеих темах.
+// Форма добавления: название + цвет (без эмодзи).
+// Модалка редактирования: название + цвет, закрывается по клику на фон или по Esc.
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import HabitItem from '../components/HabitItem';
+import { toISODate } from '../mockHabits';
 
-const emptyForm = { title: '' };
+const emptyForm = { title: '', color: '#22c55e' };
 
 export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
   const [form, setForm] = useState(emptyForm);
@@ -19,25 +21,42 @@ export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
     onAdd({
       id: 'h_' + Date.now(),
       title: trimmed,
-      icon: '',
-      color: '#16a34a',
-      createdAt: new Date().toISOString().slice(0, 10),
+      color: form.color,
+      // Локальная дата YYYY-MM-DD, не UTC
+      createdAt: toISODate(new Date()),
     });
     setForm(emptyForm);
   };
 
   // Модалка редактирования
   const [editing, setEditing] = useState(null);
-  const openEdit = (habit) => setEditing({ id: habit.id, title: habit.title });
+  const openEdit = (habit) =>
+    setEditing({ id: habit.id, title: habit.title, color: habit.color });
+
   const closeEdit = () => setEditing(null);
   const isEditValid = editing?.title.trim().length >= 2;
 
   const handleSaveEdit = (e) => {
     e.preventDefault();
     if (!isEditValid) return;
-    onUpdate(editing.id, { title: editing.title.trim() });
+    onUpdate(editing.id, {
+      title: editing.title.trim(),
+      color: editing.color,
+    });
     closeEdit();
   };
+
+  // Закрытие модалки по Esc. Слушатель вешаем только когда модалка открыта.
+  useEffect(() => {
+    if (editing === null) return;
+
+    const handleKey = (e) => {
+      if (e.key === 'Escape') closeEdit();
+    };
+
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [editing]);
 
   return (
     <section>
@@ -68,6 +87,16 @@ export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
               </p>
             )}
           </div>
+
+          {/* Цвет привычки — кастомный класс .color-input */}
+          <input
+            type="color"
+            value={form.color}
+            onChange={(e) => setForm({ ...form, color: e.target.value })}
+            className="color-input"
+            aria-label="Цвет привычки"
+          />
+
           <button
             type="submit"
             disabled={!isValid}
@@ -138,6 +167,22 @@ export default function HabitsPage({ habits, onAdd, onUpdate, onDelete }) {
                 background: 'var(--bg)',
                 color: 'var(--text)',
               }}
+            />
+
+            <label
+              className="mt-4 block text-sm"
+              style={{ color: 'var(--muted)' }}
+            >
+              Цвет
+            </label>
+            <input
+              type="color"
+              value={editing.color}
+              onChange={(e) =>
+                setEditing({ ...editing, color: e.target.value })
+              }
+              className="color-input mt-2"
+              aria-label="Цвет привычки"
             />
 
             <div className="mt-6 flex justify-end gap-2">
